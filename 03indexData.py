@@ -10,3 +10,4 @@ df = pro.index_basic(market='CSI')
 file = 'data/03indexData.csv'
 df.to_csv(file)
 print('is ok')
+print('is ok')
