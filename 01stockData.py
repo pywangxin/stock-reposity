@@ -16,3 +16,4 @@ df = pro.daily_basic(ts_code='000001.sz')
 file = 'data/000001Dailydata.csv'
 df.to_csv(file)
 print(df)
+
