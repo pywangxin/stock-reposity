@@ -9,3 +9,4 @@ file = 'data/02fundData.csv'
 df.to_csv(file)
 print(df)
 print("df")
+print("df")
