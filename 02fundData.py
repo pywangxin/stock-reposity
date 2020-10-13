@@ -8,3 +8,4 @@ df = pro.fund_basic(market='E', status='L')
 file = 'data/02fundData.csv'
 df.to_csv(file)
 print(df)
+11
