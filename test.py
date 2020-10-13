@@ -11,7 +11,7 @@ import datetime
 #print(df['20201009']['pre_close'])
 
 df = ts.pro_bar(ts_code='159948.SZ', asset='FD', ma=[10], start_date='20200116')
-
+11
 
 
 
