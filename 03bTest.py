@@ -21,7 +21,6 @@ file = 'data/02fundTrade'+tagetYear+'Data.csv'
 csvdf = pd.read_csv(file)
 csvdf.columns=['n','ts_code', 'trade_date', 'pre_close', 'open', 'high', 'low', 'close',
        'change', 'pct_chg', 'vol', 'amount', 'ma10', 'ma_v_10']
-
 # 一个一个目标基金算收益率，并记录下来
 file = 'data/03fundTradeData.csv'
 #tradeList = pd.DataFrame(columns = ['股票代码','单价',"交易数量","交易日期","交易方式","交易额",'累计收益率'])
@@ -35,9 +34,9 @@ date_list = date_range(tagetYear+"0101", tagetYear+"1231")  # 生成2016-01-01�
 i = 0
 
 # def countRate(date_range,ts_code,tradDate):
-
+# try:
 for ts_code in ts_codeList:
-    #取出股票的日行情
+    # 取出股票的日行情
     df = csvdf[(csvdf['ts_code'] == ts_code)]
     # 把trade_date设置为索引
     df.index = df['trade_date']
@@ -49,41 +48,62 @@ for ts_code in ts_codeList:
     for tdate in date_list:
         tdate = int(tdate)
         if tdate in df.index:  # 判断当前日期是否开市交易
-            # 如果T天出现收盘价格大于MA10，就在T+1的交易日的收盘价买入股票
+            # 如果T天出现收盘价格大于MA10的100%，就在T+1的交易日的收盘价买入股票
             if df.loc[tdate]['close'] >= df.loc[tdate]['ma10'] and buyprice == 0:
-                tdate2 = int(tdate) + 1
+                td2 = datetime.datetime.strptime(str(tdate), format("%Y%m%d")) + datetime.timedelta(days=1)  # 获取下一天的价格
+                td2 = datetime.datetime.strftime(td2, format("%Y%m%d"))
+                td2 = int(td2)
                 while 1:
-                    if (tdate2 in df.index):
-                        buyprice = df.loc[tdate2]['close']
+                    if (td2 in df.index):
+                        buyprice = df.loc[td2]['close']
                         num = round(capital_base / buyprice)  # 买入的基金份额
                         tradeList = tradeList.append(
-                        pd.DataFrame([[ts_code,str(buyprice), str(num), tdate2, "B", str(capital_base),'0']]),
-                        ignore_index=True)
+                            pd.DataFrame([[ts_code, str(buyprice), str(num), td2, "B", str(capital_base), '0']]),
+                            ignore_index=True)
                         break
                     else:
-                        tdate2 = tdate2 + 1
-            # 如果T天出现收盘价格小于MA10，就在T+1的交易日的开盘价卖出股票
-            elif df.loc[tdate]['close'] < df.loc[tdate]['ma10'] and buyprice != 0:
-                cur_date3 = int(tdate) + 1
+                        td2 = datetime.datetime.strptime(str(td2), format("%Y%m%d")) + datetime.timedelta(
+                            days=1)  # 获取下一天的价格
+                        td2 = datetime.datetime.strftime(td2, format("%Y%m%d"))
+                        td2 = int(td2)
+                        # if (td2 > 20201010):
+                        #     break
+            # 如果T天出现最低价价格小于MA10的，就在T+1的交易日的开盘价卖出股票
+            elif df.loc[tdate]['low'] < df.loc[tdate]['ma10'] and buyprice != 0:
+                td2 = datetime.datetime.strptime(str(tdate), format("%Y%m%d")) + datetime.timedelta(
+                    days=1)  # 获取下一天
+                td2 = datetime.datetime.strftime(td2, format("%Y%m%d"))
+                td2 = int(td2)
                 while 1:
-                    if cur_date3 in df.index:
-                        sellprice = df.loc[cur_date3]['open']
+                    if td2 in df.index:
+                        sellprice = df.loc[td2]['open']
                         capital_base = num * sellprice
                         buyprice = 0
                         history_capital.append(capital_base)  # 记录本次操作后剩余的资金
-                        net_rate = (history_capital[-1] - history_capital[0]) / history_capital[0]*100
+                        net_rate = (history_capital[-1] - history_capital[0]) / history_capital[0] * 100
                         tradeList = tradeList.append(
-                            pd.DataFrame([[ts_code,str(sellprice), str(num), cur_date3, "S", str(capital_base),net_rate]]),
+                            pd.DataFrame(
+                                [[ts_code, str(sellprice), str(num), td2, "S", str(capital_base), net_rate]]),
                             ignore_index=True)
                         # print(tradeList)
                         # print(net_rate);
                         break
                     else:
-                        cur_date3 = cur_date3 + 1
+                        td2 = datetime.datetime.strptime(str(td2), format("%Y%m%d")) + datetime.timedelta(
+                            days=1)  # 获取下一天
+                        td2 = datetime.datetime.strftime(td2, format("%Y%m%d"))
+                        td2 = int(td2)
+                        # if(td2 > 20201010):
+                        #     break
 
-    i+=1
-    print(ts_code + 'di  ' + str(i))
-print("tradeList")
+i += 1
+    # if (i > 100):
+    #     break
+print(ts_code + 'di  ' + str(i))
+# except Exception as e:
+#     if e.__class__ == KeyboardInterrupt:  # if keyboard interruption is caught
+#         raise KeyboardInterrupt
+print("nice")
 tradeList.to_csv(file)
 
 
