@@ -14,11 +14,12 @@ fundData = pd.read_csv(file)
 fundData = fundData[(fundData["name"].str.contains('ETF')) & (fundData["type"] == '契约型开放式')&(fundData["fund_type"] == '股票型')]
 
 # 获取基金日行情数据
-tagetYear = '2020'
+tagetYear = '2019'
 file = 'data/02fundTrade'+tagetYear+'Data.csv'
 tradeData = pd.read_csv(file)
 tradeData.columns=['seq','ts_code', 'trade_date', 'pre_close', 'open', 'high', 'low', 'close',
-       'change', 'pct_chg', 'vol', 'amount', 'ma10', 'ma_v_10']
+       'change', 'pct_chg', 'vol', 'amount', 'ma5', 'ma_v_5', 'ma10',
+       'ma_v_10']
 
 # 一个一个目标基金算收益率，并记录下来
 file = 'data/03fundTradeData.csv'
@@ -33,9 +34,9 @@ date_list = date_range(tagetYear+"0101", tagetYear+"1231")  # 生成2016-01-01�
 i = 0
 
 # def countRate(date_range,ts_code,tradDate):
-
+stockNetrate = pd.DataFrame()
 for ts_code in fundData["ts_code"]:
-    # print("ts_code")
+    # ts_code = '159820.SZ'
     #取出股票的日行情
     stockTradeData = tradeData[(tradeData['ts_code'] == ts_code)]
     stockTradeData.index = stockTradeData['trade_date'].astype(str)
@@ -53,6 +54,7 @@ for ts_code in fundData["ts_code"]:
                     if (tdate2 in stockTradeData.index):
                         buyprice = stockTradeData.loc[tdate2]['close']
                         num = round(capital_base / buyprice)  # 买入的基金份额
+                        history_capital.append(capital_base)
                         tradeList = tradeList.append(
                         pd.DataFrame([[ts_code,str(buyprice), str(num), tdate2, "B", str(capital_base),'0']]),
                         ignore_index=True)
@@ -60,10 +62,10 @@ for ts_code in fundData["ts_code"]:
                     else:
                         tdate2 = datetime.datetime.strftime(
                             datetime.datetime.strptime(tdate2, "%Y%m%d") + datetime.timedelta(days=1), "%Y%m%d")
-                        if(tdate2 >"20201010"):
+                        if(tdate2 >"20201014"):
                             break
-            # 如果T天出现收盘价格小于MA10，就在T+1的交易日的开盘价卖出股票
-            elif stockTradeData.loc[tdate]['close'] < stockTradeData.loc[tdate]['ma10'] and buyprice != 0:
+            # 如果T天出现收盘价格小于MA5，就在T+1的交易日的开盘价卖出股票
+            elif stockTradeData.loc[tdate]['close'] < stockTradeData.loc[tdate]['ma5'] and buyprice != 0:
                 tdate2 = datetime.datetime.strftime(datetime.datetime.strptime(tdate,"%Y%m%d") + datetime.timedelta(days=1),"%Y%m%d")
                 while 1:
                     if tdate2 in stockTradeData.index:
@@ -71,7 +73,7 @@ for ts_code in fundData["ts_code"]:
                         capital_base = num * sellprice
                         buyprice = 0
                         history_capital.append(capital_base)  # 记录本次操作后剩余的资金
-                        net_rate = (history_capital[-1] - history_capital[0]) / history_capital[0]*100
+                        net_rate = (history_capital[-1] - history_capital[-2]) / history_capital[-2]*100
                         tradeList = tradeList.append(
                             pd.DataFrame([[ts_code,str(sellprice), str(num), tdate2, "S", str(capital_base),net_rate]]),
                             ignore_index=True)
@@ -83,10 +85,16 @@ for ts_code in fundData["ts_code"]:
                             datetime.datetime.strptime(tdate2, "%Y%m%d") + datetime.timedelta(days=1), "%Y%m%d")
                         if (tdate2 > "20201010"):
                             break
-
+    if(len(history_capital) >1 ):
+        net_rate = (history_capital[-1] - history_capital[0]) / history_capital[0]*100
+        stockNetrate = stockNetrate.append(
+        pd.DataFrame([[ts_code, str(history_capital[-1]), str(history_capital[0]), str(net_rate)]]),
+        ignore_index = True)
     i+=1
-    print(ts_code + 'di  ' + str(i))
-print("tradeList")
+    print(ts_code  + ' 第 ' + str(i) + '个')
+# print(pd.DataFrame([[stockNetrate]]))
+file1 = 'data/04rate.csv'
+stockNetrate.to_csv(file1)
 tradeList.to_csv(file)
 
 
