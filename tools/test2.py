@@ -11,9 +11,9 @@ import time
 # print(fundData)
 
 #
-# tradeData = ts.pro_bar(ts_code="159820.SZ", asset='FD', ma=[5,10], start_date="20191010")
-# print(tradeData)
-# print(tradeData.columns)
-stockNetrate =list()
-
-print(pd.DataFrame([[stockNetrate]]))
+tradeData = ts.pro_bar(ts_code="159820.SZ", asset='FD', ma=[3,5,10], start_date="20191010")
+print(tradeData)
+print(tradeData.columns)
+# stockNetrate =list()
+#
+# print(pd.DataFrame([[stockNetrate]]))

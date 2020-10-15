@@ -14,7 +14,7 @@ fundData = fundData[(fundData["name"].str.contains('ETF')) &(fundData["invest_ty
 tagetYear = '2019'
 file = 'data/02fundTrade'+tagetYear+'Data.csv'
 for ts_code in fundData["ts_code"]:
-    tradeData = ts.pro_bar(ts_code=ts_code, asset='FD', ma=[5,10], start_date=tagetYear+'0101',end_date=tagetYear+'1231')
+    tradeData = ts.pro_bar(ts_code=ts_code, asset='FD', ma=[3,5,10], start_date=tagetYear+'0101',end_date=tagetYear+'1231')
     tradeData.to_csv(file,mode='a',header=False)
     print(ts_code)
     time.sleep(0.5)
