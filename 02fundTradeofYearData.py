@@ -6,15 +6,16 @@ import time
 
 # 读取基金列表
 file = 'data/01fundData.csv'
-df = pd.read_csv(file)
+fundData = pd.read_csv(file)
 # 对所有的基金坐下刷选
-df = df[(df["invest_type"] == '被动指数型') & (df["type"] == '契约型开放式') & (df["fund_type"] == '股票型') ]
+fundData = fundData[(fundData["name"].str.contains('ETF')) &(fundData["invest_type"] == '被动指数型') & (fundData["type"] == '契约型开放式')&(fundData["fund_type"] == '股票型')]
+
 # 按年获取目标基金的日交易数据并写入文件
-targetYear = '2020'
-file = 'data/02fundTrade'+targetYear+'Data.csv'
-for ts_code in df['ts_code']:
-    fundTradeData = ts.pro_bar(ts_code=ts_code, asset='FD', ma=[10], start_date=targetYear+'0101',end_date=targetYear+'1231')
-    fundTradeData.to_csv(file, mode='a',header=False)
+tagetYear = '2019'
+file = 'data/02fundTrade'+tagetYear+'Data.csv'
+for ts_code in fundData["ts_code"]:
+    tradeData = ts.pro_bar(ts_code=ts_code, asset='FD', ma=[5,10], start_date=tagetYear+'0101',end_date=tagetYear+'1231')
+    tradeData.to_csv(file,mode='a',header=False)
     print(ts_code)
     time.sleep(0.5)
 
