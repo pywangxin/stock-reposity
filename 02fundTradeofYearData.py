@@ -5,10 +5,10 @@ import datetime
 import time
 
 # 读取基金列表
-file = 'data/01fundData.csv'
-fundData = pd.read_csv(file)
-# 对所有的基金坐下刷选
-fundData = fundData[(fundData["name"].str.contains('ETF')) &(fundData["invest_type"] == '被动指数型') & (fundData["type"] == '契约型开放式')&(fundData["fund_type"] == '股票型')]
+# file = 'data/01fundData.csv'
+# fundData = pd.read_csv(file)
+# # 对所有的基金坐下刷选
+# fundData = fundData[(fundData["name"].str.contains('ETF')) &(fundData["invest_type"] == '被动指数型') & (fundData["type"] == '契约型开放式')&(fundData["fund_type"] == '股票型')]
 
 # 按年获取目标基金的日交易数据并写入文件
 tagetYear = '2019'

@@ -2,11 +2,11 @@ import pandas as pd
 
 # 获取目标ts_code
 # 读取基金列表
-file = 'data/01fundData.csv'
-fundData = pd.read_csv(file)
-# 对所有的基金坐下刷选
-fundData = fundData[
-    (fundData["name"].str.contains('ETF')) & (fundData["type"] == '契约型开放式') & (fundData["fund_type"] == '股票型')]
+# file = 'data/01fundData.csv'
+# fundData = pd.read_csv(file)
+# # 对所有的基金坐下刷选
+# fundData = fundData[
+#     (fundData["name"].str.contains('ETF')) & (fundData["type"] == '契约型开放式') & (fundData["fund_type"] == '股票型')]
 
 # 获取基金日行情数据
 tagetYear = '2019'
@@ -37,7 +37,7 @@ if  ts_code :
     num = 0.00
     for tdate in stockTradeData.index:  # 所有交易日期遍历
         # 如果T天出现收盘价格大于MA10，就在T+1的交易日开始定投500块
-        if stockTradeData.loc[tdate]['ma10'] >= stockTradeData.loc[tdate]['close'] and stockTradeData.loc[tdate][
+        if stockTradeData.loc[tdate]['close'] < stockTradeData.loc[tdate]['ma30']  and stockTradeData.loc[tdate][
             'ma10'] < stockTradeData.loc[tdate]['ma15']  :
             if tdate + 1 < len(stockTradeData.index):
                 buyprice = stockTradeData.loc[tdate + 1]['close']
