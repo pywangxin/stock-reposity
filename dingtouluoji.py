@@ -34,41 +34,29 @@ if  ts_code :
     capital_base = 100000  # 起始资金设定为10万
     history_capital = list()  # 用于记录交易结果
     buyprice = 0  # 触发买入交易前
+    num = 0.00
     for tdate in stockTradeData.index:  # 所有交易日期遍历
-        # 如果T天出现收盘价格大于MA10，就在T+1的交易日的收盘价买入股票
-        if stockTradeData.loc[tdate]['close'] >= stockTradeData.loc[tdate]['ma10'] and stockTradeData.loc[tdate][
-            'ma10'] > stockTradeData.loc[tdate]['ma15'] > stockTradeData.loc[tdate]['ma30']> stockTradeData.loc[tdate]['ma60'] and buyprice == 0:
+        # 如果T天出现收盘价格大于MA10，就在T+1的交易日开始定投500块
+        if stockTradeData.loc[tdate]['ma10'] >= stockTradeData.loc[tdate]['close'] and stockTradeData.loc[tdate][
+            'ma10'] < stockTradeData.loc[tdate]['ma15']  :
             if tdate + 1 < len(stockTradeData.index):
                 buyprice = stockTradeData.loc[tdate + 1]['close']
-                num = round(capital_base / buyprice)  # 买入的基金份额
+                num += round(500 / buyprice)  # 买入500块的基金份额
                 history_capital.append(capital_base)
                 tradeList = tradeList.append(
                     pd.DataFrame([[ts_code, str(buyprice), str(num), stockTradeData.loc[tdate+1]['trade_date'], "B",
-                                   str(capital_base), '0']]),
+                                   str(500), str(round(buyprice*num))]]),
                     ignore_index=True)
-        # 如果T天出现收盘价格小于MA5，就在T+1的交易日的开盘价卖出股票
-        elif stockTradeData.loc[tdate]['close'] < stockTradeData.loc[tdate]['ma10'] and buyprice != 0:
-            if tdate + 1 < len(stockTradeData.index):
-                sellprice = stockTradeData.loc[tdate + 1]['open']
-                capital_base = num * sellprice
-                buyprice = 0
-                history_capital.append(capital_base)  # 记录本次操作后剩余的资金
-                net_rate = (history_capital[-1] - history_capital[-2]) / history_capital[-2] * 100
-                tradeList = tradeList.append(
-                    pd.DataFrame(
-                        [[ts_code, str(sellprice), str(num), stockTradeData.loc[tdate+1]['trade_date'], "S",
-                          str(capital_base), net_rate]]),
-                    ignore_index=True)
-    if (len(history_capital) > 1):
-        net_rate = (history_capital[-1] - history_capital[0]) / history_capital[0] * 100
-        stockNetrate = stockNetrate.append(
-            pd.DataFrame([[ts_code, str(history_capital[-1]), str(history_capital[0]), str(net_rate)]]),
-            ignore_index=True)
-    i += 1
-    print(ts_code + ' 第 ' + str(i) + '个')
+        if  tdate + 1 == len(stockTradeData.index):
+           print ( stockTradeData.loc[tdate]['close'])
+    # if (len(history_capital) > 1):
+    #     net_rate = (history_capital[-1] - history_capital[0]) / history_capital[0] * 100
+    #     stockNetrate = stockNetrate.append(
+    #         pd.DataFrame([[ts_code, str(history_capital[-1]), str(history_capital[0]), str(net_rate)]]),
+    #         ignore_index=True)
 # print(pd.DataFrame([[stockNetrate]]))
-file1 = 'data/04rate.csv'
-stockNetrate.to_csv(file1)
+# file1 = 'data/04rate.csv'
+# stockNetrate.to_csv(file1)
 tradeList.to_csv(file)
 
 # plt.subplot(111)
